@@ -43,9 +43,9 @@ weather = requests.get(
     params={
         "latitude": lat,
         "longitude": lon,
-        "current": "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code",
-        "hourly": "temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m",
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,sunrise,sunset",
+        "current": "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code,is_day,cloud_cover,surface_pressure",
+        "hourly": "temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,cloud_cover,visibility",
+        "daily": "temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,weather_code,sunrise,sunset,uv_index_max,wind_speed_10m_max,wind_gusts_10m_max,sunshine_duration",
         "forecast_days": 7,
         "timezone": "auto"
     }
@@ -140,6 +140,12 @@ display(df)
 
 df_bronze=spark.sql("select * from weather_forcast.bronze.weather_raw")
 display(df_bronze)
+
+# COMMAND ----------
+
+# MAGIC %skip
+# MAGIC %sql
+# MAGIC drop table weather_forcast.bronze.weather_raw;
 
 # COMMAND ----------
 
