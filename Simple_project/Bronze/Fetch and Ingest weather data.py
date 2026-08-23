@@ -10,7 +10,7 @@ from pyspark.sql import functions as F
 # COMMAND ----------
 
 dbutils.widgets.text("city", "Kolkata", "Enter City")
-city = dbutils.widgets.get("city").strip()
+city = dbutils.widgets.get("city").strip().lower()
 
 
 # COMMAND ----------
@@ -115,9 +115,10 @@ print(f"Temperature: {weather['current']['temperature_2m']}°C")
 
 # COMMAND ----------
 
-# Create DataFrame
+# Create DataFrame with unique key
 df = spark.createDataFrame([weather]) \
-          .withColumn("ingestion_timestamp", F.current_timestamp())
+          .withColumn("ingestion_timestamp", F.current_timestamp()) \
+          .withColumn("record_key", F.xxhash64(F.col("city"),F.col("generationtime_ms")))
 print(df)
 
 # COMMAND ----------
@@ -127,7 +128,33 @@ spark.sql("CREATE SCHEMA IF NOT EXISTS weather_forcast.bronze")
 
 # COMMAND ----------
 
-# Save raw JSON - append mode with schema evolution
+# Check if table exists and if city already exists
+try:
+    existing_cities = spark.sql("""
+        SELECT DISTINCT city 
+        FROM weather_forcast.bronze.weather_raw
+    """).collect()
+    
+    existing_city_list = [row.city for row in existing_cities]
+    
+    # Determine write mode based on whether city exists
+    if city in existing_city_list:
+        # write_mode = "overwrite"
+        spark.sql(f"DELETE FROM weather_forcast.bronze.weather_raw WHERE city = '{city}'")
+        print(f"⚠️ City '{city}' already exists.")
+    # else:
+    #     write_mode = "append"
+    #     print(f"✓ City '{city}' is new. Using APPEND mode.")
+except Exception as e:
+    # Table doesn't exist yet - use append mode to create it
+    # write_mode = "append"
+    print(f"✓ Table doesn't exist yet.")
+
+# print(f"Write mode: {write_mode}")
+
+# COMMAND ----------
+
+# Save raw JSON - dynamic mode with schema evolution
 df.write \
   .mode("append") \
   .format("delta") \
@@ -143,7 +170,9 @@ display(df_bronze)
 
 # COMMAND ----------
 
+# MAGIC
 # MAGIC %skip
+# MAGIC
 # MAGIC %sql
 # MAGIC drop table weather_forcast.bronze.weather_raw;
 
