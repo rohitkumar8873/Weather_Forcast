@@ -1,0 +1,113 @@
+resources:
+  jobs:
+    Weather_forcast:
+      name: Weather_forcast
+      email_notifications:
+        on_success:
+          - rohitsauro21@gmail.com
+        on_failure:
+          - rohitsauro21@gmail.com
+      schedule:
+        quartz_cron_expression: 44 0 6 * * ?
+        timezone_id: Asia/Calcutta
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: Fetch_and_Ingest_weather_data
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Bronze/Fetch
+              and Ingest weather data
+            source: WORKSPACE
+        - task_key: current_weather
+          depends_on:
+            - task_key: Fetch_and_Ingest_weather_data
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Silver/current_weather
+            source: WORKSPACE
+        - task_key: gold_dim_location
+          depends_on:
+            - task_key: current_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_dim_location
+            source: WORKSPACE
+        - task_key: gold_fact_current_weather
+          depends_on:
+            - task_key: gold_dim_location
+            - task_key: current_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_fact_current_weather
+            source: WORKSPACE
+        - task_key: silver_daily_weather
+          depends_on:
+            - task_key: Fetch_and_Ingest_weather_data
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Silver/silver_daily_weather
+            source: WORKSPACE
+        - task_key: gold_dim_weather_forecast_scd2
+          depends_on:
+            - task_key: silver_daily_weather
+            - task_key: gold_dim_location
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_dim_weather_forecast_scd2
+            source: WORKSPACE
+        - task_key: gold_fact_daily_weather
+          depends_on:
+            - task_key: gold_dim_location
+            - task_key: silver_daily_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_fact_daily_weather
+            source: WORKSPACE
+        - task_key: gold_dashboard_kpis
+          depends_on:
+            - task_key: gold_fact_current_weather
+            - task_key: gold_fact_daily_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_dashboard_kpis
+            source: WORKSPACE
+        - task_key: Dashboard
+          depends_on:
+            - task_key: gold_dashboard_kpis
+          dashboard_task:
+            subscription:
+              subscribers:
+                - user_name: rohitsauro21@gmail.com
+              paused: false
+            warehouse_id: 86c1e19296d0f3b7
+            dashboard_id: 01f19ea7460a1b3faa7dd958f02a3c0e
+        - task_key: silver_hourly_weather
+          depends_on:
+            - task_key: Fetch_and_Ingest_weather_data
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Silver/silver_hourly_weather
+            source: WORKSPACE
+        - task_key: gold_fact_hourly_weather
+          depends_on:
+            - task_key: gold_dim_location
+            - task_key: silver_hourly_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_fact_hourly_weather
+            source: WORKSPACE
+        - task_key: gold_data_quality
+          depends_on:
+            - task_key: gold_dim_location
+            - task_key: gold_fact_daily_weather
+            - task_key: gold_fact_hourly_weather
+            - task_key: gold_fact_current_weather
+            - task_key: gold_dim_weather_forecast_scd2
+          run_if: AT_LEAST_ONE_SUCCESS
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Gold/gold_data_quality
+            source: WORKSPACE
+        - task_key: silver_data_quality
+          depends_on:
+            - task_key: silver_hourly_weather
+            - task_key: current_weather
+            - task_key: silver_daily_weather
+          notebook_task:
+            notebook_path: /Workspace/Users/rohitsauro21@gmail.com/Weather_Forcast/Simple_project/Silver/silver_data_quality
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: city
+          default: delhi
+      performance_target: PERFORMANCE_OPTIMIZED
