@@ -30,3 +30,7 @@ display(dq)
 
 if dq.filter(F.col("failed_records")>0).count()>0:
     raise Exception("Gold Data Quality Failed")
+
+# COMMAND ----------
+
+display(scd)

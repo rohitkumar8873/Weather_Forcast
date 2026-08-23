@@ -154,6 +154,18 @@ except Exception as e:
 
 # COMMAND ----------
 
+# MAGIC %skip
+# MAGIC %sql
+# MAGIC select * from weather_forcast.bronze.weather_raw
+
+# COMMAND ----------
+
+# MAGIC %skip
+# MAGIC %sql
+# MAGIC DELETE FROM weather_forcast.bronze.weather_raw WHERE city = 'delhi'
+
+# COMMAND ----------
+
 # Save raw JSON - dynamic mode with schema evolution
 df.write \
   .mode("append") \
