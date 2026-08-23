@@ -1,0 +1,591 @@
+# Weather Forecast Data Pipeline
+
+![Python](https://img.shields.io/badge/language-Python-blue)
+![SQL](https://img.shields.io/badge/language-SQL-yellow)
+![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)
+![Platform: Databricks](https://img.shields.io/badge/platform-Databricks-orange)
+
+
+## 📊 Project Overview
+
+This project implements a comprehensive weather forecasting data pipeline using the **Medallion Architecture** (Bronze, Silver, Gold) on Databricks. It ingests real-time weather data from external APIs, processes it through multiple transformation layers, and provides business-ready analytics through an enterprise dashboard.
+
+---
+
+## 🏗️ Architecture
+
+### Medallion Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     WEATHER DATA SOURCES                    │
+│                    (External Weather APIs)                  │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     BRONZE LAYER (RAW)                      │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │  • Fetch and Ingest weather data                      │ │
+│  │  • Raw JSON data ingestion                            │ │
+│  │  • Minimal transformation                             │ │
+│  └───────────────────────────────────────────────────────┘ │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   SILVER LAYER (CLEANED)                    │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │  • current_weather           • silver_daily_weather   │ │
+│  │  • silver_hourly_weather     • silver_data_quality    │ │
+│  │                                                        │ │
+│  │  Data Cleaning & Standardization:                     │ │
+│  │  - Schema validation                                  │ │
+│  │  - Type casting                                       │ │
+│  │  - Deduplication                                      │ │
+│  │  - Data quality checks                                │ │
+│  └───────────────────────────────────────────────────────┘ │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 GOLD LAYER (BUSINESS-READY)                 │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │  FACT TABLES:                                         │ │
+│  │  • gold_fact_current_weather                          │ │
+│  │  • gold_fact_daily_weather                            │ │
+│  │  • gold_fact_hourly_weather                           │ │
+│  │                                                        │ │
+│  │  DIMENSION TABLES:                                    │ │
+│  │  • gold_dim_location                                  │ │
+│  │  • gold_dim_weather_forecast_scd2                     │ │
+│  │                                                        │ │
+│  │  ANALYTICS:                                           │ │
+│  │  • gold_dashboard_kpis                                │ │
+│  │  • gold_data_quality                                  │ │
+│  └───────────────────────────────────────────────────────┘ │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│            ENTERPRISE WEATHER FORECAST DASHBOARD            │
+│                    (Business Intelligence)                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📈 Data Flow Diagram
+
+```mermaid
+graph TD
+    A[Weather API] -->|HTTP Request| B[Bronze: Fetch and Ingest]
+    B -->|Raw JSON| C[Bronze Tables]
+    
+    C -->|Extract| D1[Silver: Current Weather]
+    C -->|Extract| D2[Silver: Daily Weather]
+    C -->|Extract| D3[Silver: Hourly Weather]
+    C -->|Validate| D4[Silver: Data Quality]
+    
+    D1 -->|Transform| E1[Gold: Fact Current Weather]
+    D2 -->|Transform| E2[Gold: Fact Daily Weather]
+    D3 -->|Transform| E3[Gold: Fact Hourly Weather]
+    
+    E1 -->|Join| F1[Gold: Dim Location]
+    E2 -->|Join| F1
+    E3 -->|Join| F1
+    
+    E1 -->|SCD2| F2[Gold: Dim Weather Forecast SCD2]
+    E2 -->|SCD2| F2
+    E3 -->|SCD2| F2
+    
+    D4 -->|Aggregate| G1[Gold: Data Quality]
+    E1 -->|Metrics| G2[Gold: Dashboard KPIs]
+    E2 -->|Metrics| G2
+    E3 -->|Metrics| G2
+    
+    G2 -->|Visualize| H[Enterprise Dashboard]
+    G1 -->|Monitor| H
+    F1 -->|Reference| H
+    F2 -->|Reference| H
+    E1 -->|Query| H
+    E2 -->|Query| H
+    E3 -->|Query| H
+```
+
+---
+
+## 🗄️ Entity Relationship Diagram (ERD)
+
+```
+┌─────────────────────────────────────────┐
+│      gold_dim_location                  │
+├─────────────────────────────────────────┤
+│ 🔑 location_id (PK)                     │
+│    city_name                            │
+│    country_code                         │
+│    latitude                             │
+│    longitude                            │
+│    timezone                             │
+│    elevation                            │
+│    created_date                         │
+│    updated_date                         │
+└──────────────┬──────────────────────────┘
+               │
+               │ 1:N
+               │
+               ├──────────────────────────────────────────────┐
+               │                                              │
+               ▼                                              ▼
+┌──────────────────────────────────────┐    ┌──────────────────────────────────────┐
+│   gold_fact_current_weather          │    │   gold_fact_daily_weather            │
+├──────────────────────────────────────┤    ├──────────────────────────────────────┤
+│ 🔑 weather_id (PK)                   │    │ 🔑 daily_weather_id (PK)             │
+│ 🔗 location_id (FK)                  │    │ 🔗 location_id (FK)                  │
+│ 🔗 forecast_id (FK)                  │    │ 🔗 forecast_id (FK)                  │
+│    observation_time                  │    │    forecast_date                     │
+│    temperature                       │    │    temp_max                          │
+│    feels_like                        │    │    temp_min                          │
+│    humidity                          │    │    temp_avg                          │
+│    pressure                          │    │    precipitation                     │
+│    wind_speed                        │    │    humidity_avg                      │
+│    wind_direction                    │    │    wind_speed_max                    │
+│    visibility                        │    │    sunrise_time                      │
+│    weather_condition                 │    │    sunset_time                       │
+│    weather_description               │    │    weather_summary                   │
+│    clouds_percentage                 │    │    uv_index                          │
+│    uv_index                          │    │    created_date                      │
+│    created_date                      │    │    updated_date                      │
+│    updated_date                      │    └──────────────────────────────────────┘
+└──────────────┬───────────────────────┘              │
+               │                                      │
+               │                                      │
+               └──────────────┬───────────────────────┘
+                              │
+                              │ N:1
+                              ▼
+               ┌──────────────────────────────────────┐
+               │ gold_dim_weather_forecast_scd2       │
+               ├──────────────────────────────────────┤
+               │ 🔑 forecast_id (PK)                  │
+               │    forecast_source                   │
+               │    model_version                     │
+               │    forecast_type                     │
+               │    accuracy_score                    │
+               │    valid_from_date                   │
+               │    valid_to_date                     │
+               │    is_current                        │
+               │    created_date                      │
+               └──────────────────────────────────────┘
+
+┌──────────────────────────────────────┐
+│   gold_fact_hourly_weather           │
+├──────────────────────────────────────┤
+│ 🔑 hourly_weather_id (PK)            │
+│ 🔗 location_id (FK) ──────┐          │
+│ 🔗 forecast_id (FK)       │          │
+│    forecast_datetime      │          │
+│    temperature            │          │
+│    feels_like             │          │
+│    humidity               │          │
+│    pressure               │          │
+│    wind_speed             │          │
+│    wind_direction         │          │
+│    precipitation_prob     │          │
+│    precipitation_amount   │          │
+│    weather_condition      │          │
+│    clouds_percentage      │          │
+│    visibility             │          │
+│    created_date           │          │
+│    updated_date           │          │
+└──────────────────────────────────────┘
+           │
+           └────────────────────────────┐
+                                        │ N:1
+                                        │
+                              (connects to gold_dim_location)
+
+
+┌──────────────────────────────────────┐    ┌──────────────────────────────────────┐
+│   gold_dashboard_kpis                │    │   gold_data_quality                  │
+├──────────────────────────────────────┤    ├──────────────────────────────────────┤
+│ 🔑 kpi_id (PK)                       │    │ 🔑 quality_check_id (PK)             │
+│    kpi_name                          │    │    table_name                        │
+│    kpi_value                         │    │    check_name                        │
+│    kpi_category                      │    │    check_result                      │
+│    calculation_date                  │    │    record_count                      │
+│    target_value                      │    │    failed_count                      │
+│    variance_percentage               │    │    success_rate                      │
+│    created_date                      │    │    check_timestamp                   │
+└──────────────────────────────────────┘    │    severity_level                    │
+                                            │    error_details                     │
+                                            │    created_date                      │
+                                            └──────────────────────────────────────┘
+```
+
+**Relationships:**
+* **gold_dim_location** (1) → (N) **gold_fact_current_weather**
+* **gold_dim_location** (1) → (N) **gold_fact_daily_weather**
+* **gold_dim_location** (1) → (N) **gold_fact_hourly_weather**
+* **gold_dim_weather_forecast_scd2** (1) → (N) **gold_fact_current_weather**
+* **gold_dim_weather_forecast_scd2** (1) → (N) **gold_fact_daily_weather**
+* **gold_dim_weather_forecast_scd2** (1) → (N) **gold_fact_hourly_weather**
+
+---
+
+## 📁 Project Structure
+
+```
+Weather_Forcast/
+├─ Simple_project/
+│   ├─ Bronze/
+│   │   └─ Fetch and Ingest weather data.ipynb
+│   ├─ Silver/
+│   │   ├─ current_weather.ipynb
+│   │   ├─ silver_daily_weather.ipynb
+│   │   ├─ silver_hourly_weather.ipynb
+│   │   └─ silver_data_quality.ipynb
+│   ├─ Gold/
+│   │   ├─ gold_fact_current_weather.ipynb
+│   │   ├─ gold_fact_daily_weather.ipynb
+│   │   ├─ gold_fact_hourly_weather.ipynb
+│   │   ├─ gold_dim_location.ipynb
+│   │   ├─ gold_dim_weather_forecast_scd2.ipynb
+│   │   ├─ gold_dashboard_kpis.ipynb
+│   │   └─ gold_data_quality.ipynb
+│   ├─ job.yml
+│   └─ Enterprise Weather Forecast Dashboard
+└─ README.md
+```
+
+
+```
+Weather_Forcast/
+│
+├── Simple_project/
+│   │
+│   ├── Bronze/
+│   │   └── Fetch and Ingest weather data.ipynb
+│   │
+│   ├── Silver/
+│   │   ├── current_weather.ipynb
+│   │   ├── silver_daily_weather.ipynb
+│   │   ├── silver_hourly_weather.ipynb
+│   │   └── silver_data_quality.ipynb
+│   │
+│   ├── Gold/
+│   │   ├── gold_fact_current_weather.ipynb
+│   │   ├── gold_fact_daily_weather.ipynb
+│   │   ├── gold_fact_hourly_weather.ipynb
+│   │   ├── gold_dim_location.ipynb
+│   │   ├── gold_dim_weather_forecast_scd2.ipynb
+│   │   ├── gold_dashboard_kpis.ipynb
+│   │   └── gold_data_quality.ipynb
+│   │
+│   └── Enterprise Weather Forecast Dashboard
+│
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* [![Databricks Platform](https://img.shields.io/badge/platform-Databricks-orange)](https://databricks.com/)
+* [Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/index.html) (for automation, optional)
+* Git (for CI/CD integration)
+* Monitoring tools (built-in or custom)
+
+
+* Databricks Workspace (AWS)
+* Unity Catalog enabled
+* Serverless Compute (auto-selected)
+* Weather API credentials (e.g., OpenWeatherMap, WeatherAPI)
+
+### Setup Instructions
+
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   ```
+
+2. **Configure API Credentials**
+   * Store your weather API key in Databricks Secrets
+   * Update the Bronze layer notebook with your API endpoint
+
+3. **Create Unity Catalog Schema**
+   ```sql
+   CREATE CATALOG IF NOT EXISTS weather_catalog;
+   CREATE SCHEMA IF NOT EXISTS weather_catalog.bronze;
+   CREATE SCHEMA IF NOT EXISTS weather_catalog.silver;
+   CREATE SCHEMA IF NOT EXISTS weather_catalog.gold;
+   ```
+
+4. **Run the Pipeline**
+   * Start with Bronze layer: Execute data ingestion
+   * Proceed to Silver layer: Run all transformation notebooks
+   * Complete with Gold layer: Execute all gold notebooks
+   * Open the dashboard for visualization
+
+---
+
+## 📊 Data Pipeline Details
+
+### Bronze Layer
+* **Purpose**: Raw data ingestion from weather APIs
+* **Format**: JSON (unmodified)
+* **Frequency**: Real-time or scheduled (hourly/daily)
+* **Storage**: Delta Lake tables
+
+### Silver Layer
+* **Purpose**: Cleaned and standardized data
+* **Transformations**:
+  - Data type conversions
+  - Null handling
+  - Deduplication
+  - Schema validation
+* **Quality Checks**: Automated data quality monitoring
+
+### Gold Layer
+* **Purpose**: Business-ready analytics tables
+* **Data Model**: Star schema with:
+  - **Fact Tables**: Weather observations (current, daily, hourly)
+  - **Dimension Tables**: Location, Weather Forecast (SCD Type 2)
+* **Features**:
+  - Historical tracking with SCD2
+  - Pre-aggregated KPIs
+  - Data quality metrics
+
+---
+
+## 📊 Dashboard Features
+
+The **Enterprise Weather Forecast Dashboard** provides:
+
+* Real-time weather conditions
+* 7-day and hourly forecasts
+* Temperature trends and patterns
+* Precipitation analysis
+* Wind speed and direction visualization
+* Location-based filtering
+* Historical weather comparisons
+* Data quality monitoring
+
+---
+
+## 🔄 Data Quality Framework
+
+### Silver Layer Quality Checks
+* Schema validation
+* Null value detection
+* Duplicate record identification
+* Range validation for numeric fields
+* Timestamp consistency
+
+### Gold Layer Quality Metrics
+* Referential integrity validation
+* Completeness checks
+* Accuracy scoring
+* Freshness monitoring
+* SCD2 history validation
+
+---
+
+## 🔗 API Documentation
+
+### Weather Data Ingestion
+- **Sources:** REST APIs compliant with OpenWeatherMap/WeatherAPI format
+- **Parameters:**
+  - `city` (default: `delhi`) — settable via pipeline configuration
+  - API Key — stored securely via Databricks Secrets
+- **Sample cURL:**
+  ```bash
+  curl 'https://api.openweathermap.org/data/2.5/weather?q=delhi&appid=<API_KEY>'
+  ```
+- **Ingestion Schedule:** Daily at 6:00 AM IST (`44 0 6 * * ?`) per `job.yml`
+
+### Example Data Model Creation (Bronze to Silver)
+```python
+# Bronze notebook - minimal transformation
+df_raw = read_files('weather.json', format='json')
+df_raw.write.format('delta').saveAsTable('weather_catalog.bronze.weather_raw')
+
+# Silver notebook - cleansing, type casting
+df_clean = (
+  spark.table('weather_catalog.bronze.weather_raw')
+  .selectExpr('cast(main.temp as float) as temperature', 'dt as observation_time', 'name as city', ...)
+)
+df_clean.write.format('delta').saveAsTable('weather_catalog.silver.weather_clean')
+```
+---
+
+## ⚙️ Deployment Guide
+
+1. Clone repo & configure Databricks Secrets (API keys)
+2. Review or adjust pipeline config in [`job.yml`](Simple_project/job.yml)
+3. Deploy pipeline:
+   - Using Databricks UI for Job creation, or
+   - Automate via Databricks CLI:
+     ```bash
+     databricks jobs create --json-file Simple_project/job.yml
+     databricks jobs run-now --job-id <job_id>
+     ```
+4. Edit the parameter `city` if you want to change the forecast location
+
+---
+
+## 🧪 Testing Strategy
+- Unit tests for PySpark data transformations (notebooks should include test cells or reference `/tests` if added)
+- Data quality validation notebooks (see Gold/Silver `data_quality`)
+- End-to-end test: Validate dashboard metrics match source input for a test city/date
+- Recommend CI pipeline to lint/test code before deployment
+
+---
+
+## 🖥️ Monitoring & Observability
+- **Job Runs:** Use Databricks Jobs UI to view logs and pipeline status
+- **Email Alerts:** Pipeline is configured to notify `rohitsauro21@gmail.com` on success/failure
+- **Data Quality Dashboards:** Notebooks in Gold/Silver process and report on data integrity
+- **Lineage & Audit Logs:** Unity Catalog tracks data movement, access, and lineage
+
+---
+
+## 🚦 CI/CD Pipeline
+- Use Git for version control; push to main triggers build
+- Optional: Integrate with Databricks CLI or [Databricks Labs CI/CD templates](https://github.com/databricks/terraform-databricks-examples/tree/main/.github/workflows)
+- Example pipeline:
+  ```yaml
+  name: Databricks Weather Forecast CI/CD
+  on:
+    push:
+      branches: [ main ]
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Setup Python
+          uses: actions/setup-python@v2
+        - name: Lint & Test
+          run: pytest tests/
+        - name: Deploy to Databricks
+          run: |
+            databricks jobs create --json-file Simple_project/job.yml
+            databricks jobs run-now --job-id ${{ secrets.DATABRICKS_JOB_ID }}
+  ```
+
+---
+
+## 📋 Table Schemas (Summary)
+- **Bronze.weather_raw:** All original API columns (see OpenWeatherMap docs)
+- **Silver.weather_clean:** `temperature (float), observation_time (timestamp), city (string) ...`
+- **Gold.fact & dim tables:** see ER diagram for schema; PK/FK marked and data types inferred from sample transformations
+
+---
+
+## ⚙️ Configuration Parameters
+- `city` (default: delhi) — set in `job.yml`, passed to ingestion notebook(s)
+- Schedule: `44 0 6 * * ?` (daily at 6:00 AM IST)
+- `email_notifications` — on pipeline success/failure
+- All notebooks referenced are under `Simple_project/<Layer>/<Notebook>`
+
+---
+
+## 🛠️ Technologies Used
+
+* **Platform**: Databricks on Azure
+* **Compute**: Serverless
+* **Storage**: Delta Lake
+* **Governance**: Unity Catalog
+* **Languages**: Python, SQL
+* **Architecture**: Medallion (Bronze-Silver-Gold)
+* **Data Model**: Star Schema with SCD Type 2
+
+---
+
+## 📝 Best Practices Implemented
+
+1. **Medallion Architecture**: Progressive data refinement
+2. **Delta Lake**: ACID transactions and time travel
+3. **SCD Type 2**: Historical dimension tracking
+4. **Data Quality Gates**: Automated validation at each layer
+5. **Star Schema**: Optimized for analytics queries
+6. **Incremental Processing**: Efficient data updates
+7. **Unity Catalog**: Centralized governance and security
+
+---
+
+## 🔐 Security & Governance
+
+* Unity Catalog for data governance
+* Row-level and column-level security
+* API credentials stored in Databricks Secrets
+* Audit logging enabled
+* Data lineage tracking
+
+---
+
+## 📈 Performance Optimization
+
+* Z-ordering on frequently filtered columns
+* Partitioning by date for time-series data
+* Caching for frequently accessed dimensions
+* Optimized joins using broadcast hints
+* Serverless compute for auto-scaling
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Rate Limiting**
+   * Solution: Implement exponential backoff
+   * Check API quota limits
+
+2. **Data Quality Failures**
+   * Review silver_data_quality notebook
+   * Check gold_data_quality metrics
+
+3. **SCD2 Issues**
+   * Verify valid_from_date and valid_to_date logic
+   * Ensure is_current flag is correctly set
+
+---
+
+## 📚 Additional Resources
+
+* [Databricks Medallion Architecture](https://www.databricks.com/glossary/medallion-architecture)
+* [Delta Lake Documentation](https://docs.delta.io/)
+* [Unity Catalog Guide](https://docs.databricks.com/data-governance/unity-catalog/index.html)
+* [SCD Type 2 Implementation](https://www.databricks.com/blog/2022/08/22/dimensional-modeling-dbt-duckdb-part-2-slowly-changing-dimensions.html)
+
+---
+
+## 👥 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Submit a pull request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 📧 Contact
+
+For questions, support, or to request pipeline changes:
+- Contact: rohitsauro21@gmail.com (owner)
+- For bugs/suggestions: File an issue in the project repository or contact the data engineering team
+
+
+---
+
+**Built with ❤️ on Databricks**
