@@ -14,7 +14,7 @@ fact = (
         "location_id",
         "city",
         "country",
-        "forecast_date",
+        F.col("forecast_date").cast("date"),
         "day_name",
         "is_weekend",
         "max_temp_c",
@@ -28,7 +28,7 @@ fact = (
     )
 )
 
-fact.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.gold.fact_daily_weather")
+fact.write.mode("overwrite").option("overwriteSchema", "true").format("delta").saveAsTable("weather_forcast.gold.fact_daily_weather")
 
 # COMMAND ----------
 
