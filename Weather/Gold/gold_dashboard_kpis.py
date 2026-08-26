@@ -24,4 +24,4 @@ dashboard = kpi.join(forecast,"location_id")
 
 dashboard.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.gold.dashboard_kpis")
 
-display(dashboard)
+# display(dashboard)

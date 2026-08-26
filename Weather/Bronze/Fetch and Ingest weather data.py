@@ -9,9 +9,11 @@ from pyspark.sql import functions as F
 
 # COMMAND ----------
 
-dbutils.widgets.text("city", "Kolkata", "Enter City")
+dbutils.widgets.text("city", "delhi")
+
 city = dbutils.widgets.get("city").strip().lower()
 
+print(f"Processing city: {city}")
 
 # COMMAND ----------
 
@@ -50,7 +52,7 @@ weather = requests.get(
         "timezone": "auto"
     }
 ).json()
-print(weather)
+# print(weather)
 
 # COMMAND ----------
 
@@ -61,57 +63,6 @@ weather["latitude"] = lat
 weather["longitude"] = lon
 
 print(weather["city"])
-
-# COMMAND ----------
-
-
-
-# Extract all weather columns
-print("=== Location Info ===")
-print(f"City: {weather.get('city')}")
-print(f"Country: {weather.get('country')}")
-print(f"Latitude: {weather.get('latitude')}")
-print(f"Longitude: {weather.get('longitude')}")
-print(f"Timezone: {weather.get('timezone')}")
-print(f"Elevation: {weather.get('elevation')}")
-
-print("\n=== Current Weather ===")
-if 'current' in weather:
-    current = weather['current']
-    print(f"Time: {current.get('time')}")
-    print(f"Temperature: {current.get('temperature_2m')}°C")
-    print(f"Feels Like: {current.get('apparent_temperature')}°C")
-    print(f"Humidity: {current.get('relative_humidity_2m')}%")
-    print(f"Wind Speed: {current.get('wind_speed_10m')} km/h")
-    print(f"Weather Code: {current.get('weather_code')}")
-
-print("\n=== Hourly Forecast ===")
-if 'hourly' in weather:
-    hourly = weather['hourly']
-    print(f"Hours of data: {len(hourly.get('time', []))}")
-    print(f"Columns: {', '.join(hourly.keys())}")
-
-print("\n=== Daily Forecast ===")
-if 'daily' in weather:
-    daily = weather['daily']
-    print(f"Days of data: {len(daily.get('time', []))}")
-    print(f"Columns: {', '.join(daily.keys())}")
-
-print("\n=== All Keys ===")
-print(f"Top-level keys: {', '.join(weather.keys())}")
-
-# COMMAND ----------
-
-# DBTITLE 1,Pass weather data to next notebook task
-# Pass JSON to next notebook
-dbutils.jobs.taskValues.set(
-    key="weather_json",
-    value=json.dumps(weather)
-)
-
-print("✓ Weather data set for next task")
-print(f"City: {weather['city']}")
-print(f"Temperature: {weather['current']['temperature_2m']}°C")
 
 # COMMAND ----------
 
@@ -128,41 +79,38 @@ spark.sql("CREATE SCHEMA IF NOT EXISTS weather_forcast.bronze")
 
 # COMMAND ----------
 
-# Check if table exists and if city already exists
+table_name = "weather_forcast.bronze.weather_raw"
+
+# Make city column NOT NULL and add PRIMARY KEY constraint to optimize MERGE performance (idempotent)
 try:
-    existing_cities = spark.sql("""
-        SELECT DISTINCT city 
-        FROM weather_forcast.bronze.weather_raw
-    """).collect()
-    
-    existing_city_list = [row.city for row in existing_cities]
-    
-    # Determine write mode based on whether city exists
-    if city in existing_city_list:
-        # write_mode = "overwrite"
-        spark.sql(f"DELETE FROM weather_forcast.bronze.weather_raw WHERE city = '{city}'")
-        print(f"⚠️ City '{city}' already exists.")
-    # else:
-    #     write_mode = "append"
-    #     print(f"✓ City '{city}' is new. Using APPEND mode.")
-except Exception as e:
-    # Table doesn't exist yet - use append mode to create it
-    # write_mode = "append"
-    print(f"✓ Table doesn't exist yet.")
+    spark.sql(f"ALTER TABLE {table_name} ALTER COLUMN city SET NOT NULL")
+except Exception:
+    pass  # Column may already be NOT NULL
 
-# print(f"Write mode: {write_mode}")
+try:
+    spark.sql(f"ALTER TABLE {table_name} ADD CONSTRAINT weather_raw_pk PRIMARY KEY(city)")
+except Exception:
+    pass  # Constraint may already exist
 
-# COMMAND ----------
+# Create a temporary view for the new city data
+df.createOrReplaceTempView("new_weather")
 
-# MAGIC %skip
-# MAGIC %sql
-# MAGIC select * from weather_forcast.bronze.weather_raw
+# Update existing city or insert new city
+# city is always lowercase (see widget setup in cell 2), so direct equality
+# avoids unnecessary LOWER() calls and enables better join optimization
+spark.sql(f"""
+MERGE INTO {table_name} AS target
+USING new_weather AS source
+ON target.city = source.city
 
-# COMMAND ----------
+WHEN MATCHED THEN
+    UPDATE SET *
 
-# MAGIC %skip
-# MAGIC %sql
-# MAGIC DELETE FROM weather_forcast.bronze.weather_raw WHERE city = 'delhi'
+WHEN NOT MATCHED THEN
+    INSERT *
+""")
+
+print(f"✓ Bronze data updated for city: {city}")
 
 # COMMAND ----------
 
@@ -173,20 +121,7 @@ df.write \
   .option("mergeSchema", "true") \
   .saveAsTable("weather_forcast.bronze.weather_raw")
 
-display(df)
-
-# COMMAND ----------
-
-df_bronze=spark.sql("select * from weather_forcast.bronze.weather_raw")
-display(df_bronze)
-
-# COMMAND ----------
-
-# MAGIC
-# MAGIC %skip
-# MAGIC
-# MAGIC %sql
-# MAGIC drop table weather_forcast.bronze.weather_raw;
+# display(df)
 
 # COMMAND ----------
 

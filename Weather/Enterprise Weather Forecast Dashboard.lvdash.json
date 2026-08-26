@@ -4,7 +4,7 @@
       "name": "7c8eee6c",
       "displayName": "City",
       "queryLines": [
-        "select distinct(city) from weather_forcast.gold.dim_location;"
+        "select distinct(city) from weather_forcast.gold.dim_location;\n"
       ],
       "catalog": "weather_forcast",
       "schema": "gold"
@@ -143,7 +143,8 @@
         "SELECT\n",
         "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
         "    h.rain_probability,\n",
-        "    d.city\n",
+        "    d.city,\n",
+        "    d.country\n",
         "FROM gold.fact_hourly_weather h\n",
         "JOIN gold.dim_location d\n",
         "ON h.location_id = d.location_id\n",
@@ -217,7 +218,8 @@
         "SELECT\n",
         "    forecast_date,\n",
         "    uv_index,\n",
-        "    d.city\n",
+        "    d.city,\n",
+        "    d.country\n",
         "FROM gold.fact_daily_weather f\n",
         "JOIN gold.dim_location d\n",
         "ON f.location_id=d.location_id\n",
@@ -244,9 +246,2461 @@
       ],
       "catalog": "weather_forcast",
       "schema": "default"
+    },
+    {
+      "name": "8fc5863c",
+      "displayName": "Country",
+      "queryLines": [
+        "-- select distinct(country) from weather_forcast.gold.dim_location;\n",
+        "SELECT DISTINCT city,country\n",
+        "FROM weather_forcast.gold.dim_location\n",
+        "-- WHERE country = '{{Country}}'\n",
+        "ORDER BY city;"
+      ]
+    },
+    {
+      "name": "8852771f",
+      "displayName": "daily_mx_mi_temerature",
+      "queryLines": [
+        "select city,country,min_temp_c,max_temp_c,forecast_date\n",
+        "from gold.fact_daily_weather\n"
+      ],
+      "catalog": "weather_forcast",
+      "schema": "default"
+    },
+    {
+      "name": "8673aa08",
+      "displayName": "Temperature by Time",
+      "queryLines": [
+        "SELECT\n",
+        "    SUBSTR(h.forecast_time, 12, 8) AS forecast_time,\n",
+        "    l.city,\n",
+        "    l.country,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    ROUND(h.temperature_c, 1) AS temperature_c\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "ORDER BY h.forecast_time;"
+      ]
+    },
+    {
+      "name": "1c6c92c7",
+      "displayName": "Global City Daily Average Temperature Summary",
+      "queryLines": [
+        "SELECT\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    ROUND(AVG(h.temperature_c), 1) AS avg_temperature_c\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "GROUP BY\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE)\n",
+        "ORDER BY\n",
+        "    forecast_date,\n",
+        "    l.country,\n",
+        "    l.city;"
+      ]
+    },
+    {
+      "name": "6f7131bc",
+      "displayName": "Average Humidity by City and Date",
+      "queryLines": [
+        "SELECT\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    ROUND(AVG(h.humidity), 1) AS avg_humidity\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "GROUP BY\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE)\n",
+        "ORDER BY\n",
+        "    forecast_date,\n",
+        "    l.country,\n",
+        "    l.city;"
+      ]
+    },
+    {
+      "name": "ded06f1f",
+      "displayName": "Weather Insights by City and Date Analysis",
+      "queryLines": [
+        "SELECT\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    ROUND(AVG(h.wind_kmh), 1) AS avg_wind_speed_kmh\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "GROUP BY\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE)\n",
+        "ORDER BY\n",
+        "    forecast_date,\n",
+        "    l.country,\n",
+        "    l.city;"
+      ]
+    },
+    {
+      "name": "b67ba5e7",
+      "displayName": "Global Daily City Humidity Averages Dataset",
+      "queryLines": [
+        "SELECT\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    ROUND(AVG(h.humidity), 1) AS avg_relative_humidity\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "GROUP BY\n",
+        "    l.country,\n",
+        "    l.city,\n",
+        "    CAST(h.forecast_time AS DATE)\n",
+        "ORDER BY\n",
+        "    forecast_date,\n",
+        "    l.country,\n",
+        "    l.city;"
+      ]
+    },
+    {
+      "name": "a0198fb1",
+      "displayName": "Daily Weather Forecast Details",
+      "queryLines": [
+        "SELECT\n",
+        "  f.forecast_date,\n",
+        "  f.day_name,\n",
+        "  f.is_weekend,\n",
+        "  f.max_temp_c,\n",
+        "  f.min_temp_c,\n",
+        "  f.rainfall_mm as weekly_Rainfall,\n",
+        "  f.uv_index,\n",
+        "  date_format(f.sunrise, 'HH:mm') AS sunrise_time,\n",
+        "  date_format(f.sunset, 'HH:mm') AS sunset_time,\n",
+        "  f.sunshine_hours,\n",
+        "  f.wind_max_kmh,\n",
+        "  f.city,\n",
+        "  f.country\n",
+        "FROM\n",
+        "  gold.fact_daily_weather f\n",
+        "    JOIN gold.dim_location d\n",
+        "      ON f.location_id = d.location_id\n",
+        "ORDER BY\n",
+        "  forecast_date;"
+      ],
+      "catalog": "weather_forcast",
+      "schema": "default"
+    },
+    {
+      "name": "9d280719",
+      "displayName": "Global Hourly Weather Forecast Details",
+      "queryLines": [
+        "SELECT\n",
+        "    SUBSTR(h.forecast_time, 12, 8) AS forecast_time,\n",
+        "    l.city,\n",
+        "    l.country,\n",
+        "    CAST(h.forecast_time AS DATE) AS forecast_date,\n",
+        "    h.rain_probability,\n",
+        "    h.cloud_cover\n",
+        "FROM weather_forcast.gold.fact_hourly_weather h\n",
+        "JOIN weather_forcast.gold.dim_location l\n",
+        "    ON h.location_id = l.location_id\n",
+        "ORDER BY h.forecast_time;"
+      ],
+      "catalog": "weather_forcast",
+      "schema": "default"
+    },
+    {
+      "name": "79bf39f0",
+      "displayName": "Hourly Weather Insights for Cities",
+      "queryLines": [
+        "SELECT\n",
+        "    h.forecast_time,\n",
+        "    h.temperature_c,\n",
+        "    d.city\n",
+        "FROM gold.fact_hourly_weather h\n",
+        "JOIN gold.dim_location d\n",
+        "ON h.location_id = d.location_id\n",
+        "-- WHERE d.city = :City\n",
+        "ORDER BY h.forecast_time;"
+      ],
+      "catalog": "weather_forcast",
+      "schema": "default"
+    },
+    {
+      "name": "3aa4c0dc",
+      "displayName": "Global Weather Conditions by Date and Location",
+      "queryLines": [
+        "SELECT\n",
+        "  CAST(h.observation_time AS DATE) AS forecast_date,\n",
+        "--   h.temperature_c,\n",
+        "  h.weather_description,\n",
+        "  h.temperature_category,\n",
+        "  d.city,\n",
+        "  d.country\n",
+        "FROM\n",
+        "  gold.fact_current_weather h\n",
+        "    JOIN gold.dim_location d\n",
+        "      ON h.location_id = d.location_id\n",
+        "ORDER BY\n",
+        "  h.observation_time;\n",
+        "\n",
+        "\n",
+        "--   SELECT\n",
+        "--   CAST(observation_time AS DATE) AS forecast_date,\n",
+        "--   weather_description,\n",
+        "--   temperature_category,\n",
+        "--   city,\n",
+        "--   country\n",
+        "-- FROM\n",
+        "--   gold.fact_current_weather \n",
+        "-- ORDER BY\n",
+        "--   h.observation_time;"
+      ],
+      "catalog": "weather_forcast",
+      "schema": "default"
+    },
+    {
+      "name": "2ecbd918",
+      "displayName": "Weather Insights by Timezone and City",
+      "queryLines": [
+        "select timezone,\n",
+        "timezone_abbreviation,country\n",
+        ",city,CAST(ingestion_timestamp AS DATE) AS Forcast_date\n",
+        "\n",
+        "from weather_forcast.bronze.weather_raw"
+      ]
     }
   ],
   "pages": [
+    {
+      "name": "c106730a",
+      "displayName": "Forcasting",
+      "layout": [
+        {
+          "widget": {
+            "name": "city",
+            "queries": [
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04edd561ccebf4edaaa9f0c5d71_city",
+                "query": {
+                  "datasetName": "8fc5863c",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04ff9a21306a63df2dde383d021_city",
+                "query": {
+                  "datasetName": "8852771f",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_city",
+                "query": {
+                  "datasetName": "8673aa08",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_city",
+                "query": {
+                  "datasetName": "1c6c92c7",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_city",
+                "query": {
+                  "datasetName": "6f7131bc",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_city",
+                "query": {
+                  "datasetName": "ded06f1f",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_city",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_city",
+                "query": {
+                  "datasetName": "9d280719",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0723cc91198a3e90cb1ecee4e8c_city",
+                "query": {
+                  "datasetName": "3aa4c0dc",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a07689ba12bb820f006a9de216a4_city",
+                "query": {
+                  "datasetName": "2ecbd918",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_city",
+                "query": {
+                  "datasetName": "157c8a90",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "delhi"
+                      }
+                    ]
+                  }
+                }
+              },
+              "disallowAll": true,
+              "frame": {
+                "showTitle": true,
+                "title": "City"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04edd561ccebf4edaaa9f0c5d71_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04ff9a21306a63df2dde383d021_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0723cc91198a3e90cb1ecee4e8c_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a07689ba12bb820f006a9de216a4_city"
+                  },
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_city"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "country-1",
+            "queries": [
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04edd561ccebf4edaaa9f0c5d71_country",
+                "query": {
+                  "datasetName": "8fc5863c",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04ff9a21306a63df2dde383d021_country",
+                "query": {
+                  "datasetName": "8852771f",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_country",
+                "query": {
+                  "datasetName": "8673aa08",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_country",
+                "query": {
+                  "datasetName": "1c6c92c7",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_country",
+                "query": {
+                  "datasetName": "6f7131bc",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_country",
+                "query": {
+                  "datasetName": "ded06f1f",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_country",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_country",
+                "query": {
+                  "datasetName": "9d280719",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0723cc91198a3e90cb1ecee4e8c_country",
+                "query": {
+                  "datasetName": "3aa4c0dc",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a07689ba12bb820f006a9de216a4_country",
+                "query": {
+                  "datasetName": "2ecbd918",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_country",
+                "query": {
+                  "datasetName": "157c8a90",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "country_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "India"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Country"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04edd561ccebf4edaaa9f0c5d71_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a04ff9a21306a63df2dde383d021_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0723cc91198a3e90cb1ecee4e8c_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a07689ba12bb820f006a9de216a4_country"
+                  },
+                  {
+                    "fieldName": "country",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_country"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "date",
+            "queries": [
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13fa876152a15c366310_forecast_date",
+                "query": {
+                  "datasetName": "80299528",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_forecast_date",
+                "query": {
+                  "datasetName": "8673aa08",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_forecast_date",
+                "query": {
+                  "datasetName": "1c6c92c7",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_forecast_date",
+                "query": {
+                  "datasetName": "6f7131bc",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_forecast_date",
+                "query": {
+                  "datasetName": "ded06f1f",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_forecast_date",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_forecast_date",
+                "query": {
+                  "datasetName": "9d280719",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "forecast_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "DATE",
+                    "values": [
+                      {
+                        "value": "now/d"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date"
+              },
+              "widgetType": "filter-date-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13fa876152a15c366310_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0578c611050b5bc4702d1417984_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06163ac11d584680c113141c96d_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06449a71eb0b95c530d58250f6d_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06578721008b9f0b4de871bd7c8_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a0691f58148284f25d3b937767d9_forecast_date"
+                  },
+                  {
+                    "fieldName": "forecast_date",
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f1a06e7ba012bf92f3a385d9884b50_forecast_date"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "t2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8673aa08",
+                  "fields": [
+                    {
+                      "name": "forecast_time",
+                      "expression": "`forecast_time`"
+                    },
+                    {
+                      "name": "temperature_c",
+                      "expression": "`temperature_c`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌡️ Hourly Temperature Forecast"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#F97316",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_time",
+                  "displayName": "Time",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "temperature_c",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Temperature (°C)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "current",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1c6c92c7",
+                  "fields": [
+                    {
+                      "name": "avg_temperature_c",
+                      "expression": "`avg_temperature_c`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌡️ Average Temperature (°C)"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_temperature_c",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  },
+                  "formatTemplate": "{{ @formatted }}"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "j",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6f7131bc",
+                  "fields": [
+                    {
+                      "name": "avg_humidity",
+                      "expression": "`avg_humidity`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "💧 Humidity (%)"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_humidity",
+                  "formatTemplate": "{{ @formatted }}",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    },
+                    "significantFigures": {
+                      "type": "all"
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 5,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "wind",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ded06f1f",
+                  "fields": [
+                    {
+                      "name": "avg_wind_speed_kmh",
+                      "expression": "`avg_wind_speed_kmh`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "💨 Wind Speed"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_wind_speed_kmh"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "da1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "day_name",
+                      "expression": "`day_name`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "headerAlignment": "center",
+                "title": "📅 Day"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "day_name"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "i1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "is_weekend",
+                      "expression": "`is_weekend`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🗓️ Weekend"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "is_weekend"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "max",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "max_temp_c",
+                      "expression": "`max_temp_c`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🔥 Max Temperature (°C)"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max_temp_c"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 5,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "8092e33c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "min_temp_c",
+                      "expression": "`min_temp_c`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "❄️ Min Temperature (°C)"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "min_temp_c"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "w1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "weekly_Rainfall",
+                      "expression": "`weekly_Rainfall`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌧️ Rainfall (mm)"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "weekly_Rainfall"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 7,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "uv-index",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "uv_index",
+                      "expression": "`uv_index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "☀️ UV Index"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "uv_index"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "u1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "sunrise_time",
+                      "expression": "`sunrise_time`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌅 Sunrise"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sunrise_time"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "c979d0eb",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "sunset_time",
+                      "expression": "`sunset_time`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌇 Sunset"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sunset_time"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 9,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "sunshine-hours",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0198fb1",
+                  "fields": [
+                    {
+                      "name": "sunshine_hours",
+                      "expression": "`sunshine_hours`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "☀️ Sunshine Hours"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sunshine_hours"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 9,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "5551f734",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0c65b8b0",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "avg(rain_probability)",
+                      "expression": "AVG(`rain_probability`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌧️ 7-Day Rain Probability Forecast"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#0284C7",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_date",
+                  "displayName": "Date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(rain_probability)",
+                  "displayName": "Rain Probability (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 36,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "r1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9d280719",
+                  "fields": [
+                    {
+                      "name": "forecast_time",
+                      "expression": "`forecast_time`"
+                    },
+                    {
+                      "name": "rain_probability",
+                      "expression": "`rain_probability`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌧️ Hourly Rain Probability"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#0284C7",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_time",
+                  "displayName": "Time",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "rain_probability",
+                  "displayName": "Rain Probability (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "e894b0b4",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8852771f",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "max_temp_c",
+                      "expression": "`max_temp_c`"
+                    },
+                    {
+                      "name": "min_temp_c",
+                      "expression": "`min_temp_c`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌡️ 7-Day Temperature Forecast"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#EF4444",
+                  "#3B82F6",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_date",
+                  "displayName": "Date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "max_temp_c",
+                      "displayName": "Max Temp (°C)"
+                    },
+                    {
+                      "fieldName": "min_temp_c",
+                      "displayName": "Min Temp (°C)"
+                    }
+                  ],
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "title": ""
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 30,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8a9bfb93",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9d280719",
+                  "fields": [
+                    {
+                      "name": "forecast_time",
+                      "expression": "`forecast_time`"
+                    },
+                    {
+                      "name": "cloud_cover",
+                      "expression": "`cloud_cover`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "☁️ Hourly Cloud Cover"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#64748B",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_time",
+                  "displayName": "Time",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "cloud_cover",
+                  "displayName": "Cloud Cover (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "te1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3aa4c0dc",
+                  "fields": [
+                    {
+                      "name": "temperature_category",
+                      "expression": "`temperature_category`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌡️ Temperature Category"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "temperature_category"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "88592a8a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2ecbd918",
+                  "fields": [
+                    {
+                      "name": "timezone",
+                      "expression": "`timezone`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🌍 Timezone"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "timezone"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 11,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "a188713c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2ecbd918",
+                  "fields": [
+                    {
+                      "name": "timezone_abbreviation",
+                      "expression": "`timezone_abbreviation`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "🕐 GMT Offset"
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#0B3954"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "timezone_abbreviation"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 11,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "500449f6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "157c8a90",
+                  "fields": [
+                    {
+                      "name": "forecast_date",
+                      "expression": "`forecast_date`"
+                    },
+                    {
+                      "name": "uv_index",
+                      "expression": "`uv_index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "☀️ 7-Day UV Index Forecast"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#F59E0B",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "forecast_date",
+                  "displayName": "Date",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "uv_index",
+                  "displayName": "UV Index",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 42,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "219a694f",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<a href=\"https://dbc-ebdc9baf-5dca.cloud.databricks.com/genie/rooms/01f1a10076e71e839d36984cf2fafc6f?o=7474643895438304\" target=\"_self\">Ask anything</a>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 48,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "7d7501ac",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# <span style=\"text-align:center;display:block\"><span style=\"font-size: 48px;line-height: 1.5;color: #0B3954;\">🌤️ Enterprise Weather Forecast Dashboard</span></span>"
+              ]
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#E8F4FA"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
     {
       "name": "29b7674e",
       "displayName": "Forcasting",
@@ -256,7 +2710,7 @@
             "name": "dbd31c24",
             "queries": [
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ea78bcb1b95b919b9283a75e34b_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13ce9fc761d10c7df4af_city",
                 "query": {
                   "datasetName": "7c8eee6c",
                   "fields": [
@@ -273,7 +2727,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed65ce51c3b816b746032783bf5_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1400992e4bfde8e48119_city",
                 "query": {
                   "datasetName": "8e586a93",
                   "fields": [
@@ -290,7 +2744,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed7a3c5146bb1cbde052446a8f9_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1404855a1a8f86606611_city",
                 "query": {
                   "datasetName": "840b47d3",
                   "fields": [
@@ -307,7 +2761,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed83cb716bd9e72d148a04416a4_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1408a7c24057a4e4cdf2_city",
                 "query": {
                   "datasetName": "aeb80575",
                   "fields": [
@@ -324,7 +2778,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed982421fec9454463d3780fd93_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e140b9f835414e86340af_city",
                 "query": {
                   "datasetName": "dca9cb1f",
                   "fields": [
@@ -341,7 +2795,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19eda07441be0a27f44e849eca85e_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e140fa9a4e383e8c21172_city",
                 "query": {
                   "datasetName": "f6c1eb7f",
                   "fields": [
@@ -358,7 +2812,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19edafa63119fbadc85d0ae6e6f03_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1413b498d21ccd9389aa_city",
                 "query": {
                   "datasetName": "eef9bc41",
                   "fields": [
@@ -375,7 +2829,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee2751b19c0a1be3df4f4e3e19e_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1416bd240bbb9f762ba6_city",
                 "query": {
                   "datasetName": "ab35ad7e",
                   "fields": [
@@ -392,24 +2846,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee49cf11ed199289885b13e0a9b_city",
-                "query": {
-                  "datasetName": "0c65b8b0",
-                  "fields": [
-                    {
-                      "name": "city",
-                      "expression": "`city`"
-                    },
-                    {
-                      "name": "city_associativity",
-                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              },
-              {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee60e991f09aa6da7630a08fd92_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e141e9a2e60a1262dd97b_city",
                 "query": {
                   "datasetName": "f9a8c486",
                   "fields": [
@@ -426,7 +2863,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee738ec16b8afce3fd88f51acd4_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1423ba2ac63a8e02f7f9_city",
                 "query": {
                   "datasetName": "3cec9f2c",
                   "fields": [
@@ -443,7 +2880,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee7cdcc19e79a0b1880c2d2096d_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142886df2937ea59d40e_city",
                 "query": {
                   "datasetName": "6f89f5dc",
                   "fields": [
@@ -460,7 +2897,7 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee8bb431f0594b6027c9d35b84b_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_city",
                 "query": {
                   "datasetName": "157c8a90",
                   "fields": [
@@ -477,9 +2914,26 @@
                 }
               },
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee93a601b4fa1fdb14d733af020_city",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1432ad6eb227b24b196c_city",
                 "query": {
                   "datasetName": "7e25d8b4",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e141ab4ecddaf1cba45e4_city",
+                "query": {
+                  "datasetName": "0c65b8b0",
                   "fields": [
                     {
                       "name": "city",
@@ -505,59 +2959,59 @@
                 "fields": [
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ea78bcb1b95b919b9283a75e34b_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13ce9fc761d10c7df4af_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed65ce51c3b816b746032783bf5_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1400992e4bfde8e48119_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed7a3c5146bb1cbde052446a8f9_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1404855a1a8f86606611_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed83cb716bd9e72d148a04416a4_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1408a7c24057a4e4cdf2_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed982421fec9454463d3780fd93_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e140b9f835414e86340af_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19eda07441be0a27f44e849eca85e_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e140fa9a4e383e8c21172_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19edafa63119fbadc85d0ae6e6f03_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1413b498d21ccd9389aa_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee2751b19c0a1be3df4f4e3e19e_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1416bd240bbb9f762ba6_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee49cf11ed199289885b13e0a9b_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e141e9a2e60a1262dd97b_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee60e991f09aa6da7630a08fd92_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1423ba2ac63a8e02f7f9_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee738ec16b8afce3fd88f51acd4_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142886df2937ea59d40e_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee7cdcc19e79a0b1880c2d2096d_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e142ebf7c17443184993e_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee8bb431f0594b6027c9d35b84b_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e1432ad6eb227b24b196c_city"
                   },
                   {
                     "fieldName": "city",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee93a601b4fa1fdb14d733af020_city"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e141ab4ecddaf1cba45e4_city"
                   }
                 ]
               }
@@ -580,43 +3034,9 @@
             "name": "forcast-date",
             "queries": [
               {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed34ce11d1fbbf045f4ee6072f3_forecast_date",
+                "name": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13fa876152a15c366310_forecast_date",
                 "query": {
                   "datasetName": "80299528",
-                  "fields": [
-                    {
-                      "name": "forecast_date",
-                      "expression": "`forecast_date`"
-                    },
-                    {
-                      "name": "forecast_date_associativity",
-                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              },
-              {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee2751b19c0a1be3df4f4e3e19e_forecast_date",
-                "query": {
-                  "datasetName": "ab35ad7e",
-                  "fields": [
-                    {
-                      "name": "forecast_date",
-                      "expression": "`forecast_date`"
-                    },
-                    {
-                      "name": "forecast_date_associativity",
-                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              },
-              {
-                "name": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee49cf11ed199289885b13e0a9b_forecast_date",
-                "query": {
-                  "datasetName": "0c65b8b0",
                   "fields": [
                     {
                       "name": "forecast_date",
@@ -654,15 +3074,7 @@
                 "fields": [
                   {
                     "fieldName": "forecast_date",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ed34ce11d1fbbf045f4ee6072f3_forecast_date"
-                  },
-                  {
-                    "fieldName": "forecast_date",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee2751b19c0a1be3df4f4e3e19e_forecast_date"
-                  },
-                  {
-                    "fieldName": "forecast_date",
-                    "queryName": "dashboards/01f19ea7460a1b3faa7dd958f02a3c0e/datasets/01f19ee49cf11ed199289885b13e0a9b_forecast_date"
+                    "queryName": "dashboards/01f19f7be57d1b5aa18471263149561c/datasets/01f19f7be57e13fa876152a15c366310_forecast_date"
                   }
                 ]
               }
@@ -966,11 +3378,11 @@
               }
             ],
             "spec": {
-              "version": 3,
               "frame": {
                 "showTitle": true,
                 "title": "Hourly Temperature Trend"
               },
+              "version": 3,
               "mark": {
                 "linePatterns": [
                   null,
@@ -1413,6 +3825,22 @@
             "width": 9,
             "height": 6
           }
+        },
+        {
+          "widget": {
+            "name": "15a7dd5c",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<a href=\"https://dbc-ebdc9baf-5dca.cloud.databricks.com/genie/rooms/01f19f7f0d201c96bb4ba8cfa96a7720?o=7474643895438304\" target=\"_self\">Dashobard integeration</a>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 43,
+            "width": 3,
+            "height": 1
+          }
         }
       ],
       "pageType": "PAGE_TYPE_CANVAS",
@@ -1421,7 +3849,48 @@
   ],
   "uiSettings": {
     "theme": {
-      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+      "canvasBackgroundColor": {
+        "light": "#7F838F",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#F4F8FB",
+        "dark": "#11171C"
+      },
+      "widgetBorderColor": {
+        "light": "#0A0CFC"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#8ACAFF"
+      },
+      "widgetHeaderAlignment": "CENTER",
+      "widgetPadding": 12,
+      "widgetCornerRadius": 24,
+      "widgetShadow": 70,
+      "fontSettings": {
+        "widgetTitle": {
+          "fontColor": {
+            "light": "#0B3954"
+          }
+        },
+        "fieldTitle": {
+          "fontColor": {
+            "light": "#17324D"
+          }
+        }
+      },
+      "axisLineColor": {
+        "light": "#17324D"
+      }
+    },
+    "genieSpace": {
+      "isEnabled": true,
+      "enablementMode": "ENABLED"
     },
     "applyModeEnabled": false
   }
