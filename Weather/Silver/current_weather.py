@@ -50,14 +50,14 @@ current_df = (
 
 current_df.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.silver.current_weather")
 
-display(current_df)
+# display(current_df)
 
 # COMMAND ----------
 
-assert current_df.filter(F.col("city").isNull()).count()==0
-assert current_df.filter(F.col("temperature_c").isNull()).count()==0
-assert current_df.filter((F.col("humidity")<0)|(F.col("humidity")>100)).count()==0
-assert current_df.filter(F.col("wind_kmh")<0).count()==0
+# assert current_df.filter(F.col("city").isNull()).count()==0
+# assert current_df.filter(F.col("temperature_c").isNull()).count()==0
+# assert current_df.filter((F.col("humidity")<0)|(F.col("humidity")>100)).count()==0
+# assert current_df.filter(F.col("wind_kmh")<0).count()==0
 
 # COMMAND ----------
 

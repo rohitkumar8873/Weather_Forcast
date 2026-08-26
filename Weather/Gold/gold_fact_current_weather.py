@@ -29,4 +29,4 @@ fact.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.gold.f
 
 # COMMAND ----------
 
-display(fact)
+# display(fact)

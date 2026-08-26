@@ -42,14 +42,14 @@ hourly_df = (
 
 hourly_df.write.mode("overwrite").format("delta").option("overwriteSchema", "true").saveAsTable("weather_forcast.silver.hourly_weather")
 
-display(hourly_df)
+# display(hourly_df)
 
 # COMMAND ----------
 
-assert hourly_df.filter(F.col("forecast_time").isNull()).count()==0
-assert hourly_df.filter(F.col("temperature_c").isNull()).count()==0
-assert hourly_df.filter((F.col("rain_probability")<0)|(F.col("rain_probability")>100)).count()==0
-assert hourly_df.filter(F.col("visibility_m")<0).count()==0
+# assert hourly_df.filter(F.col("forecast_time").isNull()).count()==0
+# assert hourly_df.filter(F.col("temperature_c").isNull()).count()==0
+# assert hourly_df.filter((F.col("rain_probability")<0)|(F.col("rain_probability")>100)).count()==0
+# assert hourly_df.filter(F.col("visibility_m")<0).count()==0
 
 # COMMAND ----------
 

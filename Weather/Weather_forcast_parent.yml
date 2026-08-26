@@ -1,0 +1,27 @@
+resources:
+  jobs:
+    Weather_forcast_parent:
+      name: Weather_forcast_parent
+      email_notifications:
+        on_success:
+          - rohitsauro21@gmail.com
+        on_failure:
+          - rohitsauro21@gmail.com
+      schedule:
+        quartz_cron_expression: 44 0 6 * * ?
+        timezone_id: Asia/Calcutta
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: Weather_forcast_for_each_city
+          for_each_task:
+            inputs: '["Delhi","Mumbai","Hanoi","Kolkata","Chennai","Bengaluru","Hyderabad","Ahmedabad","Pune","Jaipur","Lucknow","Patna","Bhopal","Bhubaneswar","Guwahati","Chandigarh","London","New
+              York","Dubai","Singapore","Tokyo"]'
+            concurrency: 4
+            task:
+              task_key: Run_weather_for_city
+              run_job_task:
+                job_id: 529187634830609
+                job_parameters:
+                  city: "{{input}}"
+      queue:
+        enabled: true
