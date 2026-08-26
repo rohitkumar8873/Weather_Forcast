@@ -30,45 +30,45 @@ The pipeline currently tracks weather data for:
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                     BRONZE LAYER (RAW)                      │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  • Fetch and Ingest weather data                      │ │
-│  │  • Raw JSON data ingestion                            │ │
-│  │  • Minimal transformation                             │ │
-│  └───────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  • Fetch and Ingest weather data                      │  │
+│  │  • Raw JSON data ingestion                            │  │
+│  │  • Minimal transformation                             │  │
+│  └───────────────────────────────────────────────────────┘  │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   SILVER LAYER (CLEANED)                    │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  • current_weather           • silver_daily_weather   │ │
-│  │  • silver_hourly_weather     • silver_data_quality    │ │
-│  │                                                        │ │
-│  │  Data Cleaning & Standardization:                     │ │
-│  │  - Schema validation                                  │ │
-│  │  - Type casting                                       │ │
-│  │  - Deduplication                                      │ │
-│  │  - Data quality checks                                │ │
-│  └───────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  • current_weather           • silver_daily_weather   │  │
+│  │  • silver_hourly_weather     • silver_data_quality    │  │
+│  │                                                       |  │
+│  │  Data Cleaning & Standardization:                     │  │
+│  │  - Schema validation                                  │  │
+│  │  - Type casting                                       │  │
+│  │  - Deduplication                                      │  │
+│  │  - Data quality checks                                │  │
+│  └───────────────────────────────────────────────────────┘  │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 GOLD LAYER (BUSINESS-READY)                 │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  FACT TABLES:                                         │ │
-│  │  • gold_fact_current_weather                          │ │
-│  │  • gold_fact_daily_weather                            │ │
-│  │  • gold_fact_hourly_weather                           │ │
-│  │                                                        │ │
-│  │  DIMENSION TABLES:                                    │ │
-│  │  • gold_dim_location                                  │ │
-│  │  • gold_dim_weather_forecast_scd2                     │ │
-│  │                                                        │ │
-│  │  ANALYTICS:                                           │ │
-│  │  • gold_dashboard_kpis                                │ │
-│  │  • gold_data_quality                                  │ │
-│  └───────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  FACT TABLES:                                         │  │
+│  │  • gold_fact_current_weather                          │  │
+│  │  • gold_fact_daily_weather                            │  │
+│  │  • gold_fact_hourly_weather                           │  │
+│  │                                                       │  │
+│  │  DIMENSION TABLES:                                    │  │
+│  │  • gold_dim_location                                  │  │
+│  │  • gold_dim_weather_forecast_scd2                     │  │
+│  │                                                       │  │
+│  │  ANALYTICS:                                           │  │
+│  │  • gold_dashboard_kpis                                │  │
+│  │  • gold_data_quality                                  │  │
+│  └───────────────────────────────────────────────────────┘  │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
@@ -86,7 +86,7 @@ The pipeline currently tracks weather data for:
 
 This diagram shows the complete data flow from API ingestion through all transformation layers to the final dashboard:
 
-![Data Flow Diagram](images/data_flow_diagram.png)
+
 *Complete data flow from Weather API ingestion through Bronze, Silver, Gold layers to the Enterprise Dashboard*
 
 ### Mermaid Diagram (Interactive)
@@ -135,76 +135,76 @@ graph TD
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STEP 1: API DATA INGESTION (BRONZE LAYER)                                  │
+│ STEP 1: API DATA INGESTION (BRONZE LAYER)                                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  🌐 Open-Meteo API Calls                                                    │
-│  ├─ Geocoding API: City → Latitude/Longitude                              │
-│  │   Input:  {"name": "Delhi", "count": 1}                                │
-│  │   Output: {"latitude": 28.7041, "longitude": 77.1025, ...}             │
-│  │                                                                           │
-│  └─ Weather API: Coordinates → Weather Data                                │
-│      Input:  {lat: 28.7041, lon: 77.1025, forecast_days: 7}               │
+│  ├─ Geocoding API: City → Latitude/Longitude                                │
+│  │   Input:  {"name": "Delhi", "count": 1}                                  │
+│  │   Output: {"latitude": 28.7041, "longitude": 77.1025, ...}               │
+│  │                                                                          │
+│  └─ Weather API: Coordinates → Weather Data                                 │
+│      Input:  {lat: 28.7041, lon: 77.1025, forecast_days: 7}                 │
 │      Output: {                                                              │
-│        "current": {temp, humidity, wind_speed, ...},                       │
-│        "hourly": [{hour_1}, {hour_2}, ... {hour_168}],                    │
-│        "daily": [{day_1}, {day_2}, ... {day_7}]                           │
+│        "current": {temp, humidity, wind_speed, ...},                        │
+│        "hourly": [{hour_1}, {hour_2}, ... {hour_168}],                      │
+│        "daily": [{day_1}, {day_2}, ... {day_7}]                             │
 │      }                                                                      │
 │                                                                             │
 │  📥 Data Storage                                                            │
-│  └─ Table: weather_forcast.bronze.weather_raw                             │
+│  └─ Table: weather_forcast.bronze.weather_raw                               │
 │     Format: Delta Lake                                                      │
-│     Schema: Raw JSON with metadata (city, country, lat, lon, timestamp)    │
-│     Mode: MERGE (UPDATE existing city OR INSERT new city)                  │
+│     Schema: Raw JSON with metadata (city, country, lat, lon, timestamp)     │
+│     Mode: MERGE (UPDATE existing city OR INSERT new city)                   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
         │
         │ Extract & Parse JSON
         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STEP 2: DATA CLEANSING & STANDARDIZATION (SILVER LAYER)                    │
+│ STEP 2: DATA CLEANSING & STANDARDIZATION (SILVER LAYER)                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  📊 Silver Transformations (3 Parallel Streams)                            │
+│  📊 Silver Transformations (3 Parallel Streams)                             │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ A. Current Weather Processing                                │          │
-│  │    Source: bronze.weather_raw → current field               │          │
-│  │    Output: silver.current_weather                            │          │
-│  │    Transforms:                                               │          │
-│  │    • Flatten nested JSON structure                           │          │
-│  │    • Cast temperature_2m → current_temp (float)             │          │
-│  │    • Extract weather_code, humidity, wind_speed              │          │
-│  │    • Add observation_timestamp                               │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ A. Current Weather Processing                               │            │
+│  │    Source: bronze.weather_raw → current field               │            │
+│  │    Output: silver.current_weather                           │            │
+│  │    Transforms:                                              │            │
+│  │    • Flatten nested JSON structure                          │            │
+│  │    • Cast temperature_2m → current_temp (float)             │            │
+│  │    • Extract weather_code, humidity, wind_speed             │            │
+│  │    • Add observation_timestamp                              │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ B. Daily Weather Processing                                  │          │
-│  │    Source: bronze.weather_raw → daily field                 │          │
-│  │    Output: silver.daily_weather                              │          │
-│  │    Transforms:                                               │          │
-│  │    • Explode daily array (7 rows per city)                  │          │
-│  │    • Parse temperature_2m_max/min, precipitation_sum         │          │
-│  │    • Extract sunrise/sunset, UV index, weather_code          │          │
-│  │    • Create forecast_date column                             │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ B. Daily Weather Processing                                 │            │
+│  │    Source: bronze.weather_raw → daily field                 │            │
+│  │    Output: silver.daily_weather                             │            │
+│  │    Transforms:                                              │            │
+│  │    • Explode daily array (7 rows per city)                  │            │
+│  │    • Parse temperature_2m_max/min, precipitation_sum        │            │
+│  │    • Extract sunrise/sunset, UV index, weather_code         │            │
+│  │    • Create forecast_date column                            │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ C. Hourly Weather Processing                                 │          │
-│  │    Source: bronze.weather_raw → hourly field                │          │
-│  │    Output: silver.hourly_weather                             │          │
-│  │    Transforms:                                               │          │
-│  │    • Explode hourly array (168 rows per city)               │          │
-│  │    • Parse temperature, humidity, precipitation_probability  │          │
-│  │    • Extract wind_speed, cloud_cover, visibility             │          │
-│  │    • Create forecast_datetime column                         │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ C. Hourly Weather Processing                                │            │
+│  │    Source: bronze.weather_raw → hourly field                │            │
+│  │    Output: silver.hourly_weather                            │            │
+│  │    Transforms:                                              │            │
+│  │    • Explode hourly array (168 rows per city)               │            │
+│  │    • Parse temperature, humidity, precipitation_probability │            │
+│  │    • Extract wind_speed, cloud_cover, visibility            │            │
+│  │    • Create forecast_datetime column                        │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
 │  ✅ Data Quality Checks                                                     │
-│  └─ silver.data_quality                                                    │
+│  └─ silver.data_quality                                                     │
 │     • Null value detection                                                  │
 │     • Schema validation                                                     │
-│     • Range checks (temperature: -50 to 60°C, humidity: 0-100%)           │
+│     • Range checks (temperature: -50 to 60°C, humidity: 0-100%)             │
 │     • Duplicate detection                                                   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -212,60 +212,60 @@ graph TD
         │ Star Schema Modeling
         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STEP 3: BUSINESS-READY ANALYTICS (GOLD LAYER)                              │
+│ STEP 3: BUSINESS-READY ANALYTICS (GOLD LAYER)                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  🌟 Dimension Tables (Slowly Changing Dimension Type 2)                    │
+│  🌟 Dimension Tables (Slowly Changing Dimension Type 2)                     │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.dim_location                                            │          │
-│  │ • Generates surrogate key: location_id                       │          │
-│  │ • Stores: city, country, latitude, longitude, timezone       │          │
-│  │ • One row per unique city                                    │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.dim_location                                           │            │
+│  │ • Generates surrogate key: location_id                      │            │
+│  │ • Stores: city, country, latitude, longitude, timezone      │            │
+│  │ • One row per unique city                                   │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.dim_weather_forecast_scd2                               │          │
-│  │ • Tracks forecast changes over time (SCD Type 2)            │          │
-│  │ • Columns: forecast_id, model_version, valid_from_date,      │          │
-│  │            valid_to_date, is_current                         │          │
-│  │ • Maintains historical accuracy of forecasts                 │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.dim_weather_forecast_scd2                              │            │
+│  │ • Tracks forecast changes over time (SCD Type 2)            │            │
+│  │ • Columns: forecast_id, model_version, valid_from_date,     │            │
+│  │            valid_to_date, is_current                        │            │
+│  │ • Maintains historical accuracy of forecasts                │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  📊 Fact Tables (Kimball Star Schema)                                      │
+│  📊 Fact Tables (Kimball Star Schema)                                       │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.fact_current_weather                                    │          │
-│  │ • Foreign Keys: location_id, forecast_id                     │          │
-│  │ • Measures: temperature, feels_like, humidity, wind_speed    │          │
-│  │ • Grain: One row per city per observation time               │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.fact_current_weather                                   │            │
+│  │ • Foreign Keys: location_id, forecast_id                    │            │
+│  │ • Measures: temperature, feels_like, humidity, wind_speed   │            │
+│  │ • Grain: One row per city per observation time              │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.fact_daily_weather                                      │          │
-│  │ • Foreign Keys: location_id, forecast_id                     │          │
-│  │ • Measures: temp_max, temp_min, precipitation, UV index      │          │
-│  │ • Grain: One row per city per forecast date (7 days)        │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.fact_daily_weather                                     │            │
+│  │ • Foreign Keys: location_id, forecast_id                    │            │
+│  │ • Measures: temp_max, temp_min, precipitation, UV index     │            │
+│  │ • Grain: One row per city per forecast date (7 days)        │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.fact_hourly_weather                                     │          │
-│  │ • Foreign Keys: location_id, forecast_id                     │          │
-│  │ • Measures: temperature, precipitation_probability, cloud_cover│        │
-│  │ • Grain: One row per city per hour (168 hours)              │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.fact_hourly_weather                                     │           │
+│  │ • Foreign Keys: location_id, forecast_id                     │           │
+│  │ • Measures: temperature, precipitation_probability, cloud_cover│         │
+│  │ • Grain: One row per city per hour (168 hours)              │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  📈 Aggregate KPI Tables                                                   │
+│  📈 Aggregate KPI Tables                                                    │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐          │
-│  │ gold.dashboard_kpis                                          │          │
-│  │ • Pre-computed metrics for dashboard performance             │          │
-│  │ • Current temperature, humidity, wind speed                  │          │
-│  │ • Weekly rainfall total, sunshine duration                   │          │
-│  │ • Min/max temperature ranges                                 │          │
-│  └─────────────────────────────────────────────────────────────┘          │
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │ gold.dashboard_kpis                                         │            │
+│  │ • Pre-computed metrics for dashboard performance            │            │
+│  │ • Current temperature, humidity, wind speed                 │            │
+│  │ • Weekly rainfall total, sunshine duration                  │            │
+│  │ • Min/max temperature ranges                                │            │
+│  └─────────────────────────────────────────────────────────────┘            │
 │                                                                             │
-│  ✅ gold.data_quality                                                      │
+│  ✅ gold.data_quality                                                       │
 │     • Referential integrity checks                                          │
 │     • Fact-dimension join validation                                        │
 │     • SCD2 history validation                                               │
@@ -275,34 +275,34 @@ graph TD
         │ Dashboard Query & Visualization
         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STEP 4: BUSINESS INTELLIGENCE (DASHBOARD LAYER)                            │
+│ STEP 4: BUSINESS INTELLIGENCE (DASHBOARD LAYER)                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  📊 Enterprise Weather Forecast Dashboard (27 Datasets, 2 Pages)           │
+│  📊 Enterprise Weather Forecast Dashboard (27 Datasets, 2 Pages)            │
 │                                                                             │
-│  Page 1: Real-Time Overview                                                │
-│  ├─ KPI Counters (from gold.dashboard_kpis)                               │
+│  Page 1: Real-Time Overview                                                 │
+│  ├─ KPI Counters (from gold.dashboard_kpis)                                 │
 │  │  • Current Temperature                                                   │
 │  │  • Humidity %                                                            │
 │  │  • Wind Speed                                                            │
 │  │  • Weekly Rainfall                                                       │
 │  │                                                                          │
-│  ├─ Filters (from gold.dim_location)                                       │
-│  │  • City Selector (21 cities)                                            │
+│  ├─ Filters (from gold.dim_location)                                        │
+│  │  • City Selector (21 cities)                                             │
 │  │  • Date Picker                                                           │
 │  │                                                                          │
 │  └─ Visualizations                                                          │
 │     • Temperature trends (gold.fact_current_weather)                        │
 │     • Weather condition cards                                               │
 │                                                                             │
-│  Page 2: Advanced Analytics                                                │
-│  ├─ Multi-City Comparisons                                                 │
-│  │  • Hourly temperature bar chart (gold.fact_hourly_weather)             │
-│  │  • 7-day temperature forecast line chart (gold.fact_daily_weather)     │
-│  │  • Rain probability area chart                                          │
+│  Page 2: Advanced Analytics                                                 │
+│  ├─ Multi-City Comparisons                                                  │
+│  │  • Hourly temperature bar chart (gold.fact_hourly_weather)               │
+│  │  • 7-day temperature forecast line chart (gold.fact_daily_weather)       │
+│  │  • Rain probability area chart                                           │
 │  │                                                                          │
 │  ├─ Filters                                                                 │
-│  │  • City & Country selectors                                             │
+│  │  • City & Country selectors                                              │
 │  │  • Date range picker                                                     │
 │  │                                                                          │
 │  └─ Detailed Metrics                                                        │
@@ -310,8 +310,8 @@ graph TD
 │     • UV index forecast                                                     │
 │     • Sunrise/sunset times                                                  │
 │                                                                             │
-│  🔄 Dashboard Refresh Trigger                                              │
-│  └─ Runs automatically after gold.dashboard_kpis task completes            │
+│  🔄 Dashboard Refresh Trigger                                               │
+│  └─ Runs automatically after gold.dashboard_kpis task completes             │
 │     Email notification sent to rohitsauro21@gmail.com                       │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -720,21 +720,17 @@ The **Enterprise Weather Forecast Dashboard** provides:
 
 ### 📸 Dashboard Screenshots
 
-#### Page 1: Real-Time Weather Overview
-
-
-*Interactive dashboard showing current temperature, humidity, wind speed, and weekly rainfall metrics with city and date filters*
-
-#### Page 2: Advanced Forecasting Analytics
-![Dashboard Page 2 - Advanced Analytics](images/dashboard_page2.png)
+#### Page 1: Advance analytics Weather Forecasting 
 *Comprehensive forecasting view with hourly temperature trends, multi-city comparisons, and detailed weather metrics*
+<img width="480" height="764" alt="Screenshot 2026-08-26 at 9 34 26 AM" src="https://github.com/user-attachments/assets/ddfb6a2e-bfa7-48cf-918b-d056e486bdc1" />
 
 ---
 
 ## 📸 Job Architecture Screenshots
 
 ### Parent Job: Multi-City Orchestrator
-![Parent Job - Weather Forecast Parent](images/parent_job.png)
+<img width="1201" height="791" alt="Screenshot 2026-08-26 at 10 09 19 AM" src="https://github.com/user-attachments/assets/92fcefcb-0b95-45a5-9495-e6711a91355c" />
+
 *Parent job using for_each_task pattern to orchestrate data collection for 21 cities with concurrency of 4*
 
 **Key Features:**
@@ -745,7 +741,8 @@ The **Enterprise Weather Forecast Dashboard** provides:
 * **Email Notifications**: Configured for success and failure
 
 ### Child Job: Single City Pipeline
-![Child Job - Weather Forecast](images/child_job.png)
+<img width="1064" height="481" alt="Screenshot 2026-08-26 at 10 10 21 AM" src="https://github.com/user-attachments/assets/375fd85c-1c16-4c9b-84ae-13860ad79c37" />
+
 *Child job showing the complete data pipeline from Bronze → Silver → Gold → Dashboard*
 
 **Pipeline Tasks:**
@@ -954,6 +951,18 @@ df_clean.write.format('delta').saveAsTable('weather_catalog.silver.weather_clean
 * [SCD Type 2 Implementation](https://www.databricks.com/blog/2022/08/22/dimensional-modeling-dbt-duckdb-part-2-slowly-changing-dimensions.html)
 
 ---
+
+
+## 🚀 Future Scope
+
+- **Add More Cities:** Easily scale to hundreds or thousands of cities by extending the cities array in the parent job configuration.
+- **Real-Time Streaming:** Ingest live weather data with streaming APIs and Lakeflow Spark Declarative Pipelines.
+- **Personalized Alerts & Notifications:** Integrate user-defined weather alerts, severe weather notifications, and threshold-based triggers.
+- **Air Quality & Environmental Expansion:** Add AQI, pollen, and other environmental factors to enrich insights.
+- **Predictive Analytics & ML:** Enable forecasting models, anomaly detection, and seasonal trend analysis across cities.
+- **Custom Dashboard Features:** Support city-to-city comparisons, interactive maps, historical tracking, and mobile-friendly visuals.
+- **Open Data/API Integration:** Expose weather data for external consumption and allow open-source/community city contributions.
+--- 
 
 ## 👥 Contributing
 
