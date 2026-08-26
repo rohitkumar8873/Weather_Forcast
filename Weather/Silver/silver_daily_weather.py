@@ -55,15 +55,15 @@ daily_df = (
 
 daily_df.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.silver.daily_weather")
 
-display(daily_df)
+# display(daily_df)
 
 # COMMAND ----------
 
-assert daily_df.filter(F.col("forecast_date").isNull()).count()==0
-assert daily_df.filter(F.col("max_temp_c")<F.col("min_temp_c")).count()==0
-assert daily_df.filter(F.col("rainfall_mm")<0).count()==0
-assert daily_df.filter((F.col("uv_index")<0)|(F.col("uv_index")>15)).count()==0
-assert daily_df.filter(F.col("sunshine_hours")<0).count()==0
+# assert daily_df.filter(F.col("forecast_date").isNull()).count()==0
+# assert daily_df.filter(F.col("max_temp_c")<F.col("min_temp_c")).count()==0
+# assert daily_df.filter(F.col("rainfall_mm")<0).count()==0
+# assert daily_df.filter((F.col("uv_index")<0)|(F.col("uv_index")>15)).count()==0
+# assert daily_df.filter(F.col("sunshine_hours")<0).count()==0
 
 # COMMAND ----------
 

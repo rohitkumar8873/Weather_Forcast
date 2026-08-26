@@ -32,4 +32,4 @@ fact.write.mode("overwrite").option("overwriteSchema", "true").format("delta").s
 
 # COMMAND ----------
 
-display(fact)
+# display(fact)

@@ -16,4 +16,4 @@ dim_location = (
 
 dim_location.write.mode("overwrite").format("delta").saveAsTable("weather_forcast.gold.dim_location")
 # display(spark.table("weather_forcast.silver.current_weather"))
-display(dim_location)
+# display(dim_location)
