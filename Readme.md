@@ -722,7 +722,8 @@ The **Enterprise Weather Forecast Dashboard** provides:
 
 #### Page 1: Advance analytics Weather Forecasting 
 *Comprehensive forecasting view with hourly temperature trends, multi-city comparisons, and detailed weather metrics*
-<img width="480" height="764" alt="Screenshot 2026-08-26 at 9 34 26 AM" src="https://github.com/user-attachments/assets/ddfb6a2e-bfa7-48cf-918b-d056e486bdc1" />
+<img width="498" height="778" alt="Screenshot 2026-08-27 at 8 06 11 AM" src="https://github.com/user-attachments/assets/1becfd60-55ba-4151-9724-48e6602f0185" />
+
 
 ---
 
