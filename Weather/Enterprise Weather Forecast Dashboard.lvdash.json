@@ -1236,11 +1236,11 @@
                       "expression": "`forecast_time`"
                     },
                     {
-                      "name": "temperature_c",
-                      "expression": "`temperature_c`"
+                      "name": "avg(temperature_c)",
+                      "expression": "AVG(`temperature_c`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -1301,7 +1301,7 @@
                   }
                 },
                 "y": {
-                  "fieldName": "temperature_c",
+                  "fieldName": "avg(temperature_c)",
                   "format": {
                     "type": "number-plain",
                     "abbreviation": "compact",
@@ -2092,11 +2092,11 @@
                       "expression": "`forecast_time`"
                     },
                     {
-                      "name": "rain_probability",
-                      "expression": "`rain_probability`"
+                      "name": "avg(rain_probability)",
+                      "expression": "AVG(`rain_probability`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -2157,7 +2157,7 @@
                   }
                 },
                 "y": {
-                  "fieldName": "rain_probability",
+                  "fieldName": "avg(rain_probability)",
                   "displayName": "Rain Probability (%)",
                   "scale": {
                     "type": "quantitative"
@@ -2316,11 +2316,11 @@
                       "expression": "`forecast_time`"
                     },
                     {
-                      "name": "cloud_cover",
-                      "expression": "`cloud_cover`"
+                      "name": "avg(cloud_cover)",
+                      "expression": "AVG(`cloud_cover`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -2381,7 +2381,7 @@
                   }
                 },
                 "y": {
-                  "fieldName": "cloud_cover",
+                  "fieldName": "avg(cloud_cover)",
                   "displayName": "Cloud Cover (%)",
                   "scale": {
                     "type": "quantitative"
@@ -2573,11 +2573,11 @@
                       "expression": "`forecast_date`"
                     },
                     {
-                      "name": "uv_index",
-                      "expression": "`uv_index`"
+                      "name": "avg(uv_index)",
+                      "expression": "AVG(`uv_index`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -2638,7 +2638,7 @@
                   }
                 },
                 "y": {
-                  "fieldName": "uv_index",
+                  "fieldName": "avg(uv_index)",
                   "displayName": "UV Index",
                   "scale": {
                     "type": "quantitative"
